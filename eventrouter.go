@@ -193,7 +193,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.Source.Host,
 			)
 		}
-		klog.Errorf("result: %t del event: %s ", delok, event.InvolvedObject.Name)
+		klog.Errorf("result: %t del event: %s ", delok, event.ObjectMeta.Name)
 		return
 	}
 	switch event.Type {
