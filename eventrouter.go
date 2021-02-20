@@ -157,15 +157,43 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 	var gauge prometheus.Gauge
 	var err error
 
+	var delok bool
 	if shouldDel {
-		delok := kubernetesWarningEventGaugeVec.DeleteLabelValues(
-			event.InvolvedObject.Kind,
-			event.InvolvedObject.Name,
-			event.InvolvedObject.Namespace,
-			event.Reason,
-			event.Source.Host,
-		)
-		klog.Errorf("del event: %t", delok)
+		switch event.Type {
+		case "Normal":
+			delok = kubernetesNormalEventGaugeVec.DeleteLabelValues(
+				event.InvolvedObject.Kind,
+				event.InvolvedObject.Name,
+				event.InvolvedObject.Namespace,
+				event.Reason,
+				event.Source.Host,
+			)
+		case "Warning":
+			delok = kubernetesWarningEventGaugeVec.DeleteLabelValues(
+				event.InvolvedObject.Kind,
+				event.InvolvedObject.Name,
+				event.InvolvedObject.Namespace,
+				event.Reason,
+				event.Source.Host,
+			)
+		case "Info":
+			delok = kubernetesInfoEventGaugeVec.DeleteLabelValues(
+				event.InvolvedObject.Kind,
+				event.InvolvedObject.Name,
+				event.InvolvedObject.Namespace,
+				event.Reason,
+				event.Source.Host,
+			)
+		default:
+			delok = kubernetesUnknownEventGaugeVec.DeleteLabelValues(
+				event.InvolvedObject.Kind,
+				event.InvolvedObject.Name,
+				event.InvolvedObject.Namespace,
+				event.Reason,
+				event.Source.Host,
+			)
+		}
+		klog.Errorf("result: %t del event: %s ", delok, event.InvolvedObject.Name)
 		return
 	}
 	switch event.Type {
