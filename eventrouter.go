@@ -22,8 +22,6 @@ import (
 	"github.com/heptiolabs/eventrouter/sinks"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/spf13/viper"
-	"k8s.io/klog"
-
 	v1 "k8s.io/api/core/v1"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	coreinformers "k8s.io/client-go/informers/core/v1"
@@ -193,7 +191,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.Source.Host,
 			)
 		}
-		klog.Infof("result: %t del event: %s ", delok, event.ObjectMeta.Name)
+		glog.Infof("result: %t del event: %s ", delok, event.ObjectMeta.Name)
 		return
 	}
 	switch event.Type {
