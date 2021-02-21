@@ -105,7 +105,7 @@ func NewEventRouter(kubeClient kubernetes.Interface, eventsInformer coreinformer
 		kubeClient: kubeClient,
 		eSink:      sinks.ManufactureSink(),
 	}
-	glog.Errorf("new event router")
+	//glog.Errorf("new event router")
 	eventsInformer.Informer().AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    er.addEvent,
 		UpdateFunc: er.updateEvent,
@@ -114,7 +114,7 @@ func NewEventRouter(kubeClient kubernetes.Interface, eventsInformer coreinformer
 
 	//er.eLister = eventsInformer.Lister()
 	er.eListerSynched = eventsInformer.Informer().HasSynced
-	glog.Errorf("sync ok")
+	//glog.Errorf("sync ok")
 	return er
 }
 
@@ -193,7 +193,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.Source.Host,
 			)
 		}
-		klog.Errorf("result: %t del event: %s ", delok, event.ObjectMeta.Name)
+		klog.Infof("result: %t del event: %s ", delok, event.ObjectMeta.Name)
 		return
 	}
 	switch event.Type {
