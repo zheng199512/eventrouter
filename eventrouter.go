@@ -40,6 +40,7 @@ var (
 		"involved_object_namespace",
 		"reason",
 		"source",
+		"event_name",
 	})
 	kubernetesNormalEventGaugeVec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "heptio_eventrouter_normal_total",
@@ -50,6 +51,7 @@ var (
 		"involved_object_namespace",
 		"reason",
 		"source",
+		"event_name",
 	})
 	kubernetesInfoEventGaugeVec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "heptio_eventrouter_info_total",
@@ -60,6 +62,7 @@ var (
 		"involved_object_namespace",
 		"reason",
 		"source",
+		"event_name",
 	})
 	kubernetesUnknownEventGaugeVec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "heptio_eventrouter_unknown_total",
@@ -70,6 +73,7 @@ var (
 		"involved_object_namespace",
 		"reason",
 		"source",
+		"event_name",
 	})
 )
 
@@ -110,7 +114,7 @@ func NewEventRouter(kubeClient kubernetes.Interface, eventsInformer coreinformer
 		DeleteFunc: er.deleteEvent,
 	})
 
-	//er.eLister = eventsInformer.Lister()
+	er.eLister = eventsInformer.Lister()
 	er.eListerSynched = eventsInformer.Informer().HasSynced
 	//glog.Errorf("sync ok")
 	return er
@@ -165,6 +169,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.InvolvedObject.Namespace,
 				event.Reason,
 				event.Source.Host,
+				event.ObjectMeta.Name,
 			)
 		case "Warning":
 			delok = kubernetesWarningEventGaugeVec.DeleteLabelValues(
@@ -173,6 +178,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.InvolvedObject.Namespace,
 				event.Reason,
 				event.Source.Host,
+				event.ObjectMeta.Name,
 			)
 		case "Info":
 			delok = kubernetesInfoEventGaugeVec.DeleteLabelValues(
@@ -181,6 +187,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.InvolvedObject.Namespace,
 				event.Reason,
 				event.Source.Host,
+				event.ObjectMeta.Name,
 			)
 		default:
 			delok = kubernetesUnknownEventGaugeVec.DeleteLabelValues(
@@ -189,6 +196,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.InvolvedObject.Namespace,
 				event.Reason,
 				event.Source.Host,
+				event.ObjectMeta.Name,
 			)
 		}
 		glog.Infof("result: %t del event: %s ", delok, event.ObjectMeta.Name)
@@ -202,6 +210,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 			event.InvolvedObject.Namespace,
 			event.Reason,
 			event.Source.Host,
+			event.ObjectMeta.Name,
 		)
 	case "Warning":
 		gauge, err = kubernetesWarningEventGaugeVec.GetMetricWithLabelValues(
@@ -210,6 +219,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 			event.InvolvedObject.Namespace,
 			event.Reason,
 			event.Source.Host,
+			event.ObjectMeta.Name,
 		)
 	case "Info":
 		gauge, err = kubernetesInfoEventGaugeVec.GetMetricWithLabelValues(
@@ -218,6 +228,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 			event.InvolvedObject.Namespace,
 			event.Reason,
 			event.Source.Host,
+			event.ObjectMeta.Name,
 		)
 	default:
 		gauge, err = kubernetesUnknownEventGaugeVec.GetMetricWithLabelValues(
@@ -226,6 +237,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 			event.InvolvedObject.Namespace,
 			event.Reason,
 			event.Source.Host,
+			event.ObjectMeta.Name,
 		)
 	}
 
