@@ -42,42 +42,76 @@ subjects:
 ---
 apiVersion: v1
 data:
-  config.json: |- 
+  config.json: |-
     {
-      "sink": "glog"
+      "sink": "influxdb",
+      "influxdbHost": "10.203.181.205:8086",
+      "influxdbUsername": "k8s_events",
+      "influxdbPassword": "4c9d27af61401461",
+      "influxdbName": "k8s_events",
+      "influxdbSecure": false,
+      "influxdbWithFields": false,
+      "influxdbInsecureSsl": false,
+      "influxdbRetentionPolicy": "0",
+      "influxdbClusterName": "zzzc2",
+      "influxdbDisableCounterMetrics": false,
+      "influxdbConcurrency": 100
     }
 kind: ConfigMap
 metadata:
-  name: eventrouter-cm
+  name: eventrouter-cm-to-influxdb-shbt
   namespace: kube-system
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: eventrouter
-  namespace: kube-system
   labels:
-    app: eventrouter
+    app: eventrouter-to-influxdb-shbt
+  name: eventrouter-to-influxdb-shbt
+  namespace: kube-system
 spec:
+  progressDeadlineSeconds: 600
   replicas: 1
+  revisionHistoryLimit: 10
   selector:
     matchLabels:
-      app: eventrouter
+      app: eventrouter-to-influxdb-shbt
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
   template:
     metadata:
+      creationTimestamp: null
       labels:
-        app: eventrouter
+        app: eventrouter-to-influxdb-shbt
         tier: control-plane-addons
     spec:
       containers:
-        - name: kube-eventrouter
-          image: gcr.io/heptio-images/eventrouter:latest
-          imagePullPolicy: IfNotPresent
+        - image: r.addops.soft.360.cn/zhenghongfei/eventrouter:v0.3
+          imagePullPolicy: Always
+          name: kube-eventrouter
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
           volumeMounts:
-          - name: config-volume
-            mountPath: /etc/eventrouter
+            - mountPath: /etc/eventrouter
+              name: config-volume
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
       serviceAccount: eventrouter
+      serviceAccountName: eventrouter
+      terminationGracePeriodSeconds: 30
+      tolerations:
+        - key: CriticalAddonsOnly
+          operator: Exists
+        - effect: NoSchedule
+          operator: Exists
       volumes:
-        - name: config-volume
-          configMap:
-            name: eventrouter-cm
+        - configMap:
+            defaultMode: 420
+            name: eventrouter-cm-to-influxdb-shbt
+          name: config-volume

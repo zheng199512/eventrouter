@@ -41,6 +41,7 @@ var (
 		"reason",
 		"source",
 		"event_name",
+		"event_message",
 	})
 	kubernetesNormalEventGaugeVec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "heptio_eventrouter_normal_total",
@@ -52,6 +53,7 @@ var (
 		"reason",
 		"source",
 		"event_name",
+		"event_message",
 	})
 	kubernetesInfoEventGaugeVec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "heptio_eventrouter_info_total",
@@ -63,6 +65,7 @@ var (
 		"reason",
 		"source",
 		"event_name",
+		"event_message",
 	})
 	kubernetesUnknownEventGaugeVec = prometheus.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "heptio_eventrouter_unknown_total",
@@ -74,6 +77,7 @@ var (
 		"reason",
 		"source",
 		"event_name",
+		"event_message",
 	})
 )
 
@@ -170,6 +174,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.Reason,
 				event.Source.Host,
 				event.ObjectMeta.Name,
+				event.Message,
 			)
 		case "Warning":
 			delok = kubernetesWarningEventGaugeVec.DeleteLabelValues(
@@ -179,6 +184,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.Reason,
 				event.Source.Host,
 				event.ObjectMeta.Name,
+				event.Message,
 			)
 		case "Info":
 			delok = kubernetesInfoEventGaugeVec.DeleteLabelValues(
@@ -188,6 +194,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.Reason,
 				event.Source.Host,
 				event.ObjectMeta.Name,
+				event.Message,
 			)
 		default:
 			delok = kubernetesUnknownEventGaugeVec.DeleteLabelValues(
@@ -197,6 +204,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 				event.Reason,
 				event.Source.Host,
 				event.ObjectMeta.Name,
+				event.Message,
 			)
 		}
 		glog.Infof("result: %t del event: %s ", delok, event.ObjectMeta.Name)
@@ -211,6 +219,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 			event.Reason,
 			event.Source.Host,
 			event.ObjectMeta.Name,
+			event.Message,
 		)
 	case "Warning":
 		gauge, err = kubernetesWarningEventGaugeVec.GetMetricWithLabelValues(
@@ -220,6 +229,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 			event.Reason,
 			event.Source.Host,
 			event.ObjectMeta.Name,
+			event.Message,
 		)
 	case "Info":
 		gauge, err = kubernetesInfoEventGaugeVec.GetMetricWithLabelValues(
@@ -229,6 +239,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 			event.Reason,
 			event.Source.Host,
 			event.ObjectMeta.Name,
+			event.Message,
 		)
 	default:
 		gauge, err = kubernetesUnknownEventGaugeVec.GetMetricWithLabelValues(
@@ -238,6 +249,7 @@ func prometheusEvent(event *v1.Event, shouldDel bool) {
 			event.Reason,
 			event.Source.Host,
 			event.ObjectMeta.Name,
+			event.Message,
 		)
 	}
 
